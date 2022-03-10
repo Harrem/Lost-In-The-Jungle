@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -11,11 +12,13 @@ public class Enemy : MonoBehaviour
 
     SpriteRenderer spriteRenderer;
     Action action;
+    Player player;
 
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         action = GetComponent<Action>();
+        player = GameObject.Find("Player").GetComponent<Player>();
     }
 
     private void Update()
@@ -42,8 +45,12 @@ public class Enemy : MonoBehaviour
         var direction = Vector2.right * distance;
         var rightRay = Physics2D.Raycast(rightOrigin, direction, distance);
         var leftRay = Physics2D.Raycast(leftOrigin, -direction, distance);
+        var leftBottomRay = Physics2D.Raycast(leftOrigin + Vector2.down * 0.7f, -direction + Vector2.down,1);
+        var rightBottomRay = Physics2D.Raycast(rightOrigin + Vector2.down * 0.7f, direction + Vector2.down,1);
         Debug.DrawRay(rightOrigin, direction, Color.red);
         Debug.DrawRay(leftOrigin, -direction, Color.yellow);
+        Debug.DrawRay(leftOrigin + Vector2.down * 0.7f, -direction + Vector2.down, Color.yellow);
+        Debug.DrawRay(rightOrigin + Vector2.down * 0.7f, direction + Vector2.down, Color.yellow);
 
         if (rightRay.collider != null)
         {
@@ -68,7 +75,20 @@ public class Enemy : MonoBehaviour
         else
         {
             currentState = EnemyState.Patrol;
+            if (leftBottomRay.collider == null)
+            {
+                isFacingRight = true;
+                Debug.Log("Left is null");
+            }
+            else if (rightBottomRay.collider == null)
+            {
+                isFacingRight = false;
+                Debug.Log("right is null");
+            }
+
         }
+
+        
     }
 
     public void Move()
@@ -91,6 +111,8 @@ public class Enemy : MonoBehaviour
     public virtual void Attack()
     {
         action.Attack();
+
+        player.TakeDamage(10);
     }
 
     //private void OnCollisionEnter2D(Collision2D collision)
@@ -111,14 +133,21 @@ public class Enemy : MonoBehaviour
     {
         if (health <= 0)
         {
-            Destroy(gameObject);
             action.Die();
+            new WaitForSeconds(3);
+            Destroy(gameObject);
         }
+    }
+
+    IEnumerator Wait(int sec)
+    {
+        yield return new WaitForSeconds(sec);
     }
 
     enum EnemyState
     {
+        Idle,
         Patrol,
-        Attack,
+        Attack
     }
 }

@@ -21,11 +21,13 @@ public class Action : MonoBehaviour
 
     public void Move(float speed)
     {
+        animator.SetBool("isAttacking", false);
         animator.SetFloat("speed", speed);
     }
 
     public void Attack()
     {
+
         animator.SetBool("isAttacking", true);
     }
 

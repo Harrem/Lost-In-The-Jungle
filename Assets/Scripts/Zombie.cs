@@ -11,3 +11,8 @@ public class Zombie : Enemy
         base.Attack();
     }
 }
+
+public class FemaleZombie : Enemy
+{
+
+}
